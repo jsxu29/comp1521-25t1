@@ -58,7 +58,7 @@ if (stat(<file path name>, &s) != 0) {
 mode_t mode = s.mode;
 
 ```
-is directory?   user permissions    group permissions   other permissions
+is directory?   owner permissions    group permissions   other permissions
 d               rwx                 rwx                 rwx
 -               ---                 ---                 ---
 ```
@@ -77,7 +77,7 @@ E.g.
 ```
                            rw-r--r--
 mode_t mode = 0b .....     110100100
-                           000000100 -- 1 << 2 
+             &  S_IROTH =  000000100 -- 1 << 2 
 
                            000000100 >> 2 -> 000000001
                            000000000 >> 2 -> 000000000
