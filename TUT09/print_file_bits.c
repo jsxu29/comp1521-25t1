@@ -17,33 +17,31 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // read 32-byte hexadeimcal numbers
+    // read 32-bit hexadecimal numbers until end of file
     int32_t number;
-    while (fscanf(stream, "%x", &number) != 1) {
-        // print the least significant byte as a signed decimal number
-        
-        // get least significant byte
+    while (fscanf(stream, "%x", &number) == 1) {
+        // print lowest byte
         //   xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
         // & 00000000 00000000 00000000 11111111
         //   00000000 00000000 00000000 xxxxxxxx
-        int32_t least_significant = number & 0xFF;
-        
-        // sign extension: in C, type casting to an integer type with more bits,
-        // the extra space is filled with the leading sign bit.
 
-        // check if leading sign bit is a 1
+        int32_t least_signifcant_byte = number & 0xFF;
+
+        // sign extension 
+        // In C, type casting to an integer type with more bits
+        // the extra space is filled with the leading sign bit.
         //   00000000 00000000 00000000 xxxxxxxx
         // & 00000000 00000000 00000000 10000000
         //   00000000 00000000 00000000 x0000000
-        if ((least_significant & (1 << 7)) != 0) {
-            // sign extend
-            // 0xFFFFFF00 = 0b 11111111 11111111 11111111 00000000
-            least_significant = least_significant | 0xFFFFFF00;
+        // check if the leading sign bit of the last byte is a 1
+        if ((least_signifcant_byte & 0x80) != 0) {
+            least_signifcant_byte = least_signifcant_byte | 0xFFFFFF00;
         }
 
-        printf("%d\n", least_significant);
+        printf("%d\n", least_signifcant_byte);
     }
 
+    // close the file
     fclose(stream);
 
     return 0;

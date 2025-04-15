@@ -1,11 +1,23 @@
 # Summary
 
+- manipulate files with low-level operating system calls
 - introduce environment variables and how programs can access and manipulate them
 - understand and practice coding with UTF-8 encoded characters
 
 # Tutorial 9 Notes
 
 ## File Functions (Continued)
+
+| Function             | Low-Level Operating System (OS) Calls (e.g., `open`, `read`) | C stdio Library (`fopen`, `fread`)            |
+|--------------------|--------------------------------------------|-----------------------------------------------|
+| Return Type        | File descriptor (`int`)                    | FILE pointer (`FILE*`)                        |
+| Buffering          | Unbuffered                                | Buffered (handled by library)                 |
+| Portability        | Unix/Linux-specific (POSIX)               | Cross-platform (ANSI C - Linux, Windows, macOS)                       |
+| Performance        | Potentially higher in critical cases       | Generally efficient for most use cases        |
+| Flexibility        | Fine-grained control over I/O              | Simplified and abstracted interface           |
+| Suitability        | Devices, sockets, low-level resources      | Regular file handling                         |
+| Thread Safety      | Generally no locking                       | Locking used for shared FILE* streams         |
+| Complexity         | More verbose and error-prone               | Easier to write, read, and maintain           |
 
 | Operation            | Low-Level OS Call       | C stdio Library (stdio.h) | Key Differences                                                                 |
 |----------------------|--------------------------|----------------------------|----------------------------------------------------------------------------------|
@@ -18,21 +30,9 @@
 | Check EOF            | N/A                      | `feof()`                   | `feof()` checks if end-of-file was reached on a FILE* stream.                   |
 | Error handling       | `errno`                  | `ferror()`, `perror()`     | stdio provides higher-level error detection and reporting.                      |
 
-
-| Function             | Low-Level OS Calls (e.g., `open`, `read`) | C stdio Library (`fopen`, `fread`)            |
-|--------------------|--------------------------------------------|-----------------------------------------------|
-| Return Type        | File descriptor (`int`)                    | FILE pointer (`FILE*`)                        |
-| Buffering          | Unbuffered                                | Buffered (handled by library)                 |
-| Portability        | Unix/Linux-specific (POSIX)               | Cross-platform (ANSI C - Linux, Windows, macOS)                       |
-| Performance        | Potentially higher in critical cases       | Generally efficient for most use cases        |
-| Flexibility        | Fine-grained control over I/O              | Simplified and abstracted interface           |
-| Suitability        | Devices, sockets, low-level resources      | Regular file handling                         |
-| Thread Safety      | Generally no locking                       | Locking used for shared FILE* streams         |
-| Complexity         | More verbose and error-prone               | Easier to write, read, and maintain           |
-
 ### Low-Level OS Calls Uses
 - You need direct control over file descriptors or are working with:
-  - Sockets, pipes, character/block devices.
+  - Sockets/networks, pipes, character/block devices.
 - Performance is critical and you want to manage your own buffering.
 - You're building systems-level tools (e.g., shells, daemons).
 - You need atomic operations (e.g., `open` with `O_CREAT | O_EXCL`).
@@ -58,7 +58,7 @@ Consider the lseek(fd, offset, whence) function.
 Consider a file of size 10,000 bytes, open for reading on file descriptor fd, initially positioned at the start of the file (offset 0). What will be the file position after each of these calls to lseek()? Assume that they are executed in sequence, and one will change the file state that the next one deals with.
 
 Initial: offset 0
-lseek(fd, 0, SEEK_END) -> 10,000 + 0 = 10,000  
+lseek(fd, 0, SEEK_END) -> 10,000 + 0 = 10,000 
 lseek(fd, -1000, SEEK_CUR) -> 10,000 - 1,000 = 9,000
 lseek(fd, 0, SEEK_SET) -> 0
 lseek(fd, -100, SEEK_SET);

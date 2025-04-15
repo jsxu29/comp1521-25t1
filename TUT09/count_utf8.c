@@ -15,59 +15,58 @@
 #include <stdio.h>
 #include <stdlib.h>
 
- int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <string>\n", argv[0]);
         return 1;
     }
 
-    // given a string, loop through it, and depending on the head/first byte of the utf-8 character, we know its length of the character
-    // utf 8 string of 9 bytes: 012 345 67 8
-    // at index 0: look at length of that unicode character, and move forward by that length to get to the next character
+    // we can loop through our utf-8 string
+    // and for every codepoint/unicode character, we can find the length of it by looking at the first byte of the char
+    // and then we can move by that length to the next unicode char and repeat 
+    char *utf8_str = argv[1];
     int unicode_char_num = 0;
-    for (int i = 0; argv[1][i] != '\0'; ) {
-        // keep track of number of unicode characters
+    for (int i = 0; utf8_str[i] != '\0'; ) {
         unicode_char_num++;
-        // increment the position to the head/first byte of the next unicode character
-        // find length of this unicode character
-        char head_byte = argv[1][i];
-        // 1 - 0xxxxxxx
-        // 2 - 110xxxxx
-        // 3 - 1110xxxx
-        // 4 - 11110xxx
 
-        //   --------
+        // increment by length of unicode char
+
+        // if format is 0xxxxxxx, length is 1
+        //   xxxxxxxx
         // & 10000000
-        //   -0000000 check if this is equal to 0 0000000
-        if ((head_byte & 1 << 7) == 0) {
+        //   x0000000 -> 00000000 or 10000000
+        if ((utf8_str[i] & 0x80) == 0) {
             i += 1;
-        } 
-        //   --------
+        }
+        // else if format is 110xxxxx, length is 2
+        //   xxxxxxxx
         // & 11100000
-        //   ---00000 check if this is equal to 110 00000
-        else if ((head_byte & 0xE0) == 0xC0) {
+        //   xxx00000, check if 110 00000
+        else if ((utf8_str[i] & 0xE0) == 0xC0) {
             i += 2;
         }
-
-        //   --------
+        // else if format is 1110xxxx, length is 3
+        //   xxxxxxxx
         // & 11110000
-        //   ----0000 check if this is equal to 1110 0000
-        else if ((head_byte & 0xF0) == 0xE0) {
+        //   xxxx0000, check if 1110 0000
+        else if ((utf8_str[i] & 0xF0) == 0xE0) {
             i += 3;
         }
-
-        //   --------
+        // else if format is 11110xxx, length is 4
+        //   xxxxxxxx
         // & 11111000
-        //   -----000 check if this is equal to 11110 000
-        else if ((head_byte & 0xF8) == 0xF0) {
+        //   xxxxx000, check if 1111 0000
+        else if ((utf8_str[i] & 0xF8) == 0xF0) {
             i += 4;
         }
-
+        // else, there is an error, invalid unicode char
         else {
-            fprintf(stderr, "Invalid utf-8 character\n");
+            perror("Invalid UTF-8 string\n");
+            return 1;
         }
     }
 
-    printf("there are %d codepoints in the string\n", unicode_char_num);
+    printf("there are %d codepoints in this string\n", unicode_char_num);
+
     return 0;
 }
